@@ -1,0 +1,12 @@
+{
+  "categories": ["pop_culture_memes", "pop_wordplay", "multilingual_puns"],
+  "platforms": [
+    {
+      "name": "knowyourmeme",
+      "scraper": "scrapers/knowyourmeme.py",
+      "enabled": true
+    }
+  ],
+  "output_dir": "output",
+  "output_file": "scraped_posts.json"
+}

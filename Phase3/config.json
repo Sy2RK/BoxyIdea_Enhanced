@@ -1,0 +1,8 @@
+{
+  "phase2_input": "../Phase2/output/synthesized_levels.json",
+  "hint_file": "../Phase2/hint_from_Feishu.txt",
+  "background_file": "../Phase2/background.txt",
+  "output_dir": "output",
+  "accepted_file": "accepted_levels.json",
+  "result_file": "Phase3_result.txt"
+}
