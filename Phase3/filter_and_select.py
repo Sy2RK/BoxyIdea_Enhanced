@@ -21,7 +21,7 @@ def load_text_file(path):
         return ""
 
 
-def call_llm(client, model, prompt, fallback_model=None, max_tokens=2048):
+def call_llm(client, model, prompt, fallback_model=None, max_tokens=2048, timeout=120):
     """Call OpenRouter LLM and return response text. Falls back to secondary model on failure."""
     messages = [
         {"role": "system", "content": "You are a game design evaluator. Output ONLY valid JSON or raw text as requested. No markdown code fences, no extra commentary."},
@@ -33,6 +33,7 @@ def call_llm(client, model, prompt, fallback_model=None, max_tokens=2048):
             messages=messages,
             temperature=0.4,
             max_tokens=max_tokens,
+            timeout=timeout,
         )
         return response.choices[0].message.content
     except Exception as primary_err:
@@ -43,6 +44,7 @@ def call_llm(client, model, prompt, fallback_model=None, max_tokens=2048):
                 messages=messages,
                 temperature=0.4,
                 max_tokens=max_tokens,
+                timeout=timeout,
             )
             return response.choices[0].message.content
         raise
@@ -59,12 +61,31 @@ def extract_json(text):
     return json.loads(text)
 
 
-def build_filter_prompt(level_data, hints):
-    """Build the prompt for the accept/reject evaluation step."""
-    level_json = json.dumps(level_data, indent=2, ensure_ascii=False)
+def condense_level(level_data):
+    """Extract only the key fields for evaluation to keep prompts short."""
+    return {
+        "level_name": level_data.get("level_name", ""),
+        "meme_inspiration": level_data.get("meme_inspiration", ""),
+        "surface_layer": level_data.get("surface_layer", ""),
+        "misdirection_layer": level_data.get("misdirection_layer", ""),
+        "full_game_flow": level_data.get("full_game_flow", ""),
+        "hint_design": level_data.get("hint_design", {}),
+        "design_check": level_data.get("design_check", {}),
+    }
+
+
+def build_filter_prompt(level_data, background, hints):
+    """Single-step evaluation prompt: asks for reasoning ending with a single-word verdict."""
+    level_json = json.dumps(condense_level(level_data), indent=2, ensure_ascii=False)
     prompt = f"""You are evaluating a level design for the mobile puzzle platformer game 《Boxy》.
 
-Here is feedback and hints from the design team (may be empty if none provided):
+Game background and design philosophy:
+---
+{background}
+---
+Especially be aware of that: "  翻转必须有逻辑支撑，不能是纯粹的随机或无厘头。
+  每个反转元素必须要与后续触发行为有合理逻辑联系，不是毫无相关的关系链。" 
+Additional feedback and hints from the design team (may be empty if none provided):
 ---
 {hints}
 ---
@@ -73,28 +94,25 @@ Evaluate the following level design:
 
 {level_json}
 
-Is this design good enough to be selected as a final level? Consider:
-- Creativity and originality
-- Fit with the Boxy philosophy (breaking the fourth wall, UI as gameplay, wordplay)
-- Clarity of the puzzle structure
-- Whether the twist is surprising yet logical
-- Whether it avoids introducing too many new elements
-
-Output ONLY a single JSON object with no markdown code fences:
-{{
-  "accepted": true or false,
-  "reason": "one-sentence explanation"
-}}"""
+Write 2-3 sentences explaining your decision, then end your response with exactly one word on the final line: accept or reject."""
     return prompt
 
 
-def build_selection_prompt(accepted_levels, background):
-    """Build the prompt for choosing the best level among accepted ones."""
-    levels_text = ""
-    for title, data in accepted_levels.items():
-        levels_text += f"\n\n=== LEVEL: {title} ===\n"
-        levels_text += json.dumps(data, indent=2, ensure_ascii=False)
+def build_selection_prompt(accepted_items, background, top_n=3):
+    """Build the prompt for choosing the best levels among accepted ones.
+    accepted_items: list of (index, title, data) tuples."""
+    summaries = []
+    for idx, title, data in accepted_items:
+        summaries.append(f"""
+[{idx}] Level Name: {data.get('level_name', title)}
+Meme Inspiration: {data.get('meme_inspiration', '')}
+Surface Layer: {data.get('surface_layer', '')}
+Misdirection Layer: {data.get('misdirection_layer', '')}
+Full Game Flow: {data.get('full_game_flow', '')}
+Hint Design: {json.dumps(data.get('hint_design', {}), ensure_ascii=False)}
+""")
 
+    ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(top_n, f"{top_n}th")
     prompt = f"""You are the lead designer for the mobile puzzle platformer 《Boxy》.
 
 Here is the game background and design philosophy:
@@ -102,17 +120,22 @@ Here is the game background and design philosophy:
 {background}
 ---
 
-Below are the level designs that passed the initial filter. Read them carefully:
-{levels_text}
+Below are the level designs that passed the initial filter. Each is prefixed with a number in [brackets]. Read them carefully:
+{''.join(summaries)}
 
-Your task: choose the SINGLE best level design.
+Your task: choose the TOP {top_n} best level designs, ranked from best to {ordinal} best.
 Criteria:
 - Most creative and memorable twist
 - Strongest fit with the Boxy philosophy
 - Best balance of surprise and logical consistency
 - Best use of existing game elements (doors, UI buttons, text, etc.)
 
-Output ONLY the full JSON object of the chosen level, exactly as it appears above. Do not wrap it in markdown code fences. Do not add any extra text before or after."""
+Output ONLY the numbers from the brackets, one per line, in order from #1 best to #{top_n} best. For example:
+2
+5
+1
+
+No extra text, no markdown, no explanation. If fewer than {top_n} levels exist, list as many as are available."""
     return prompt
 
 
@@ -135,6 +158,10 @@ def main():
     api_key = os.environ.get("OPENROUTER_API_KEY")
     model = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
     fallback_model = os.environ.get("OPENROUTER_MODEL_DROP")
+    try:
+        top_n = int(os.environ.get("TOP_N", "3"))
+    except ValueError:
+        top_n = 3
 
     if not api_key:
         print("[error] OPENROUTER_API_KEY not set. Create a .env file in Phase3/ or export it.", file=sys.stderr)
@@ -144,7 +171,7 @@ def main():
 
     # Resolve paths relative to script directory
     phase2_path = os.path.join(script_dir, config["phase2_input"])
-    hint_path = os.path.join(script_dir, config["hint_file"])
+    hint_path = os.path.join(script_dir, "..", "Phase2", "hint_from_Feishu.txt")
     background_path = os.path.join(script_dir, config["background_file"])
     output_dir = os.path.join(script_dir, config["output_dir"])
     accepted_path = os.path.join(output_dir, config["accepted_file"])
@@ -175,22 +202,55 @@ def main():
             json.dump({}, f, indent=2, ensure_ascii=False)
         sys.exit(0)
 
-    # Step 1: Filter each valid level
+    # Step 1: Filter each valid level (single-step: evaluation + verdict in one call)
     accepted = {}
     items = list(valid_levels.items())
     for i, (title, data) in enumerate(items):
-        prompt = build_filter_prompt(data, hints)
         print(f"[{i+1}/{len(items)}] Filtering: {title}")
 
         try:
-            raw = call_llm(client, model, prompt, fallback_model=fallback_model, max_tokens=512)
-            verdict = extract_json(raw)
+            prompt = build_filter_prompt(data, background, hints)
+            raw = call_llm(client, model, prompt, fallback_model=fallback_model, max_tokens=2048)
+            if raw is None:
+                raise ValueError("LLM returned empty response")
 
-            if verdict.get("accepted") is True:
+            # Parse verdict robustly from the response
+            print(f"  [raw model output]\n{raw}\n  [/raw]")
+            text_lower = raw.strip().lower()
+            lines = raw.strip().splitlines()
+            last_line = lines[-1].strip().lower() if lines else ""
+            print(f"  [debug] raw length: {len(raw)} chars, {len(lines)} lines")
+            print(f"  [debug] last_line: '{last_line}'")
+            print(f"  [debug] 'accept' in full text: {'accept' in text_lower}")
+            print(f"  [debug] 'reject' in full text: {'reject' in text_lower}")
+            print(f"  ✓ evaluation done")
+
+            # Priority 1: last line contains accept/reject
+            if "accept" in last_line and "reject" not in last_line:
                 accepted[title] = data
-                print(f"  ✓ accepted — {verdict.get('reason', '')}")
+                print(f"  ✓ accepted")
+            elif "reject" in last_line and "accept" not in last_line:
+                print(f"  ✗ rejected")
+            # Priority 2: search whole text for accept/reject
+            elif "accept" in text_lower and "reject" not in text_lower:
+                accepted[title] = data
+                print(f"  ✓ accepted (detected in full text)")
+            elif "reject" in text_lower and "accept" not in text_lower:
+                print(f"  ✗ rejected (detected in full text)")
+            # Priority 3: both words present → prefer the one that appears last
+            elif "accept" in text_lower or "reject" in text_lower:
+                accept_idx = text_lower.rfind("accept")
+                reject_idx = text_lower.rfind("reject")
+                if accept_idx > reject_idx:
+                    accepted[title] = data
+                    print(f"  ✓ accepted (last occurrence)")
+                else:
+                    print(f"  ✗ rejected (last occurrence)")
             else:
-                print(f"  ✗ rejected — {verdict.get('reason', '')}")
+                # Fallback: if the model didn't say accept/reject clearly, default to accepting
+                # so we don't silently drop good designs due to formatting quirks
+                accepted[title] = data
+                print(f"  ✓ accepted (defaulted — no clear verdict found)")
         except Exception as e:
             print(f"  ✗ evaluation failed: {e}", file=sys.stderr)
 
@@ -202,29 +262,54 @@ def main():
         json.dump(accepted, f, indent=2, ensure_ascii=False)
     print(f"[filter] {len(accepted)}/{len(valid_levels)} levels accepted → {accepted_path}")
 
-    # Step 2: Select the best one
+    # Step 2: Select the top N
     if not accepted:
         print("[select] No accepted levels. Writing fallback result.")
         with open(result_path, "w", encoding="utf-8") as f:
             f.write("No good sources this time")
         sys.exit(0)
 
-    select_prompt = build_selection_prompt(accepted, background)
-    print(f"[select] Choosing best level from {len(accepted)} accepted designs...")
+    # Build indexed list for stable selection
+    accepted_items = [(i + 1, title, data) for i, (title, data) in enumerate(accepted.items())]
+    select_prompt = build_selection_prompt(accepted_items, background, top_n=top_n)
+    print(f"[select] Choosing top {top_n} levels from {len(accepted)} accepted designs...")
 
     try:
-        raw_best = call_llm(client, model, select_prompt, fallback_model=fallback_model, max_tokens=4096)
-        # Try to clean up markdown fences if the model ignored instructions
-        best_text = raw_best.strip()
-        if best_text.startswith("```"):
-            best_text = best_text.split("\n", 1)[1]
-            if best_text.endswith("```"):
-                best_text = best_text[:-3]
-            best_text = best_text.strip()
+        raw_best = call_llm(client, model, select_prompt, fallback_model=fallback_model, max_tokens=256)
+        if raw_best is None:
+            raise ValueError("LLM returned empty response")
+
+        # Parse numbers from the response (one per line)
+        import re
+        chosen_indices = []
+        for line in raw_best.strip().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            # Extract the first integer from the line
+            m = re.search(r"\d+", line)
+            if m:
+                chosen_indices.append(int(m.group()))
+
+        chosen_indices = chosen_indices[:top_n]
+        if not chosen_indices:
+            raise ValueError("No level numbers returned by model")
+
+        # Map index -> data directly
+        index_to_data = {idx: data for idx, _, data in accepted_items}
+        top_levels = []
+        for idx in chosen_indices:
+            if idx in index_to_data:
+                top_levels.append(index_to_data[idx])
+            else:
+                print(f"  [warn] Model returned invalid index {idx}, skipping", file=sys.stderr)
+
+        if not top_levels:
+            raise ValueError(f"Could not match any chosen indices: {chosen_indices}")
 
         with open(result_path, "w", encoding="utf-8") as f:
-            f.write(best_text)
-        print(f"[select] Best level written → {result_path}")
+            json.dump(top_levels, f, indent=2, ensure_ascii=False)
+        print(f"[select] Top {len(top_levels)} levels written → {result_path}")
     except Exception as e:
         print(f"[error] Selection failed: {e}", file=sys.stderr)
         with open(result_path, "w", encoding="utf-8") as f:

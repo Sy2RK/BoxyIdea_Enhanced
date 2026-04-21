@@ -1,0 +1,56 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 炸毁死亡重置 / Blow up the Reset"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n打破第四面墙，利用玩家对TNT炸毁敌人的惯性思维，将其反转为摧毁游戏系统UI（重置按钮）的元游戏解法。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n玩家站在高台上，旁边有一个TNT炸药桶。下方地面铺满尖刺敌人，没有任何落脚点，常规跳跃绝对无法跨越。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n玩家会本能地将TNT推下高台去炸地面的尖刺敌人开路（利用物理破坏障碍的认知偏差），但由于敌人铺满地面，炸死一个后跳下依然会死于其他敌人并触发重置。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家进入关卡，发现地面铺满尖刺敌人无法通过。2. 玩家将TNT推下高台炸死一个敌人，跳下后依然死亡。3. 玩家死亡时重置按钮高亮闪烁。4. 结合提示语中的'Death'，玩家改变思路，将TNT推向或移至UI界面上的重置按钮处引爆。5. 重置按钮被炸毁，关卡的死亡重置机制失效，玩家直接踩着尖刺即可安全过关。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: Destroy the Death.\n- 表面含义: 消灭带来死亡的尖刺敌人。\n- 实际含义: 炸毁导致玩家死亡重置的UI按钮（重置按钮）。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [https://knowyourmeme.com/memes/tntd-total-neurotypical-death](https://knowyourmeme.com/memes/tntd-total-neurotypical-death)"
+        }
+      }
+    ]
+  }
+}

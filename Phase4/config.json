@@ -1,0 +1,5 @@
+{
+  "phase3_input": "../Phase3/output/Phase3_result.txt",
+  "output_dir": "output",
+  "output_file": "feishu_card.json"
+}

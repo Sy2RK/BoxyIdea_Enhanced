@@ -1,0 +1,56 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 震耳欲聋的悲伤"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\nCryana (Pragmata) 大哭表情梗及 Uohhhh 刷屏现象，将其转化为需要物理静音来消除的视觉与听觉障碍"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n巨大的萝莉机器人在大哭，不断喷发😭表情符号，泪水和巨大的声波作为物理屏障将Boxy不断推开"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n让玩家以为需要通过高超的跳跃技巧、寻找遮挡物或触发游戏内的特定机关来躲避泪水和声波的推力"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家进入关卡，遭遇大哭的机器人，泪水与声波形成阻碍前进的屏障。2. 玩家尝试操控Boxy跳过或强行通过，但被声波无情推开导致失败。3. 玩家领悟到需要从游戏外介入，按下手机侧面的物理音量减量键。4. 随着设备系统音量降低，机器人的哭声随之减弱直至停止，声波和泪水屏障彻底消失。5. Boxy在安静的环境中顺利走到终点通关。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 真的太吵了...\n- 表面含义: 描述当前关卡环境的恶劣，抱怨机器人哭声巨大非常烦人\n- 实际含义: 直接暗示解谜的关键在于解决“吵”的问题，即调低现实设备的物理音量"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [https://knowyourmeme.com/memes/cryana-twitch-chat-badge-controversy-pragmata](https://knowyourmeme.com/memes/cryana-twitch-chat-badge-controversy-pragmata)"
+        }
+      }
+    ]
+  }
+}

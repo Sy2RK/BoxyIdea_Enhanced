@@ -12,7 +12,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 
-RSS_URL = "https://knowyourmeme.com/memes/submissions.rss"
+RSS_URL = "https://knowyourmeme.com/memes/all.rss"
 MAX_POSTS = 10
 
 
@@ -103,12 +103,13 @@ def download_image(url, title, images_dir):
         return None
 
 
-def scrape():
+def scrape(max_posts=None):
     root = fetch_feed(RSS_URL)
     items = root.findall(".//item")
 
+    limit = max_posts if max_posts else MAX_POSTS
     posts = []
-    for item in items[:MAX_POSTS]:
+    for item in items[:limit]:
         title_el = item.find("title")
         link_el = item.find("link")
         pubdate_el = item.find("pubDate")
@@ -168,11 +169,12 @@ def scrape():
 def main():
     parser = argparse.ArgumentParser(description="KnowYourMeme scraper")
     parser.add_argument("--output", required=True, help="Path to write JSON output")
+    parser.add_argument("--max-posts", type=int, default=None, help="Maximum posts to fetch")
     args = parser.parse_args()
 
     os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
 
-    posts = scrape()
+    posts = scrape(max_posts=args.max_posts)
 
     result = {"source": "knowyourmeme", "posts": posts}
     with open(args.output, "w", encoding="utf-8") as f:

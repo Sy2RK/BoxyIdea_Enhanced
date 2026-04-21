@@ -95,7 +95,7 @@ Original design:
 {narrative_design}
 ---
 
-Output ONLY valid JSON. No markdown code fences, no extra commentary.
+Output ONLY valid JSON. No markdown code fences, no extra commentary. The content language should be in chinese.
 
 Required JSON structure:
 {{

@@ -22,16 +22,17 @@ mkdir -p "$ABS_OUTPUT_DIR"
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-# Get enabled platforms
-PLATFORM_COUNT=$(python3 -c "
+# Get enabled platforms with their config
+PLATFORM_CONFIG=$(python3 -c "
 import json, sys
 config = json.load(open('$CONFIG_FILE'))
 enabled = [p for p in config['platforms'] if p.get('enabled')]
 for p in enabled:
-    print(p['scraper'], p['name'])
+    max_posts = p.get('max_posts', '')
+    print(p['scraper'], p['name'], max_posts)
 ")
 
-if [ -z "$PLATFORM_COUNT" ]; then
+if [ -z "$PLATFORM_CONFIG" ]; then
   echo "[error] no enabled platforms in config.json"
   exit 1
 fi
@@ -39,33 +40,21 @@ fi
 echo "[run] Starting scrapers..."
 
 # Run each scraper in parallel
-while IFS=' ' read -r SCRAPER NAME; do
+while IFS=' ' read -r SCRAPER NAME MAX_POSTS; do
   echo "  launching $NAME ($SCRAPER)..."
+  EXTRA_ARGS=""
+  if [ -n "$MAX_POSTS" ]; then
+    EXTRA_ARGS="--max-posts $MAX_POSTS"
+  fi
   IMAGES_DIR="$IMAGES_DIR" python3 "$SCRIPT_DIR/$SCRAPER" \
-    --output "$TMP_DIR/${NAME}.json" &
-done <<< "$PLATFORM_COUNT"
+    --output "$TMP_DIR/${NAME}.json" $EXTRA_ARGS &
+done <<< "$PLATFORM_CONFIG"
 
 # Wait for all background jobs
 wait
 
 echo "[run] All scrapers finished. Merging..."
 
-# Merge all JSON files into one
-MERGE_SCRIPT="
-import json, glob, os
-
-output = {}
-for path in sorted(glob.glob('$TMP_DIR/*.json')):
-    with open(path) as f:
-        data = json.load(f)
-    source = data.pop('source', os.path.basename(path).replace('.json', ''))
-    output[source] = data
-
-out_path = os.path.join('$ABS_OUTPUT_DIR', '$OUTPUT_FILE')
-with open(out_path, 'w', encoding='utf-8') as f:
-    json.dump(output, f, indent=2, ensure_ascii=False)
-
-print(f'[run] Merged {len(output)} sources -> {out_path}')
-"
-
-python3 -c "$MERGE_SCRIPT"
+python3 "$SCRIPT_DIR/merge_sources.py" \
+  --output "$ABS_OUTPUT_DIR/$OUTPUT_FILE" \
+  "$TMP_DIR"/*.json

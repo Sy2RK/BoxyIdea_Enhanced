@@ -5,6 +5,11 @@
       "name": "knowyourmeme",
       "scraper": "scrapers/knowyourmeme.py",
       "enabled": true
+    },
+    {
+      "name": "google_news",
+      "scraper": "scrapers/google_news.py",
+      "enabled": true
     }
   ],
   "output_dir": "output",
