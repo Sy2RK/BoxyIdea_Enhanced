@@ -1,0 +1,106 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 第3关：其实是方的 / Actually Cubed"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**原 meme 图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_066fdc16-90d3-4012-b3c2-7926c484723g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "原 meme 图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**关卡设计图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_e24e7b28-4cf9-4a51-a1f2-5f51ee73c62g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "关卡概念图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n灵感来自“看起来像正常的地球/地图/自然景观，结果其实是一个方块世界”的反差梗。玩家先把场景当成普通的圆形星球或自然地形来理解，但真正的规则是：这个世界本身就是立方体，平整的方脸才是通路。笑点和解法合一，‘方’不是装饰，而是答案。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n一开始玩家看到的是一个很‘正常’的世界：前方有一个像地球仪底座一样的世界模型，远处终点门被放在对面的高处，地面看起来像连续的自然弧面，似乎需要绕行或跳跃攀爬才能过去。整体视觉先给人一种‘这是个圆的、自然的世界’的错觉。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n假线索是玩家会本能地把这个世界当成圆形地球或普通球体，试图沿着弧面绕圈寻找上坡路，或者以为要从侧面慢慢攀爬过去。这个误导利用了‘看到球体就默认它是圆的’的认知惯性，以及平台跳跃里‘绕到背面总能找到路’的习惯思维。实际上，绕圈不会带来任何进展，因为真正可通行的是被隐藏在视角里的平整方脸。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家靠近中央的世界模型，先误以为它是普通圆球地形，尝试沿边缘绕行。\n2. 点击/触碰世界模型，使其旋转；当它转到某个角度时，原本看似圆润的外形会露出一整块平整的立方体面，并与前方路径对齐。\n3. 玩家直接踩上这块对齐的平面，借它作为桥面走到终点门。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 别只看它像什么，试着转一转。\n- 表面含义: 玩家会理解成：这个东西可能需要旋转一下，看看有没有别的面。\n- 实际含义: 提示玩家去触碰/旋转世界模型，发现所谓‘圆的世界’其实有方形平面可对齐成路。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [查看来源](https://www.reddit.com/r/memes/comments/1tgi1y2/wait_its_all_cubed/)"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看多维表格"
+            },
+            "type": "primary",
+            "url": "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
+          }
+        ]
+      }
+    ]
+  }
+}

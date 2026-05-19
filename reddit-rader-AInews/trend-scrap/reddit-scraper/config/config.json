@@ -1,0 +1,24 @@
+{
+  "customParams": {
+    "subreddits": [
+      "ArtificialInteligence",
+      "singularity",
+      "OpenAI",
+      "ChatGPT",
+      "LocalLLaMA",
+      "StableDiffusion",
+      "aivideo"
+    ],
+    "popularSorts": ["hot", "new"],
+    "subredditSort": "hot",
+    "subredditTopTime": "day"
+  },
+  "defaultQueries": ["aifilter", "aivideo", "aiphoto", "aidance"],
+  "resultsPerKeyword": 15,
+  "requestDelayMs": 350,
+  "filters": {
+    "minPlayCount": 0,
+    "minDiggCount": 0,
+    "minShareCount": 0
+  }
+}

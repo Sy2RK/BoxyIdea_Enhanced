@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 
 RSS_URL = "https://knowyourmeme.com/memes/all.rss"
-MAX_POSTS = 10
+MAX_POSTS = 5
 
 
 def fetch(url, retries=2):
@@ -147,7 +147,16 @@ def scrape(max_posts=None):
         local_path = None
         if image_url:
             images_dir = os.path.join(os.environ.get("IMAGES_DIR", "output/images"))
-            local_path = download_image(image_url, title, images_dir)
+            abs_path = download_image(image_url, title, images_dir)
+            # Store relative path (relative to Phase1 directory) instead of absolute
+            if abs_path:
+                phase1_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                try:
+                    local_path = os.path.relpath(abs_path, phase1_dir)
+                except ValueError:
+                    local_path = abs_path
+            else:
+                local_path = None
 
         posts.append({
             "source": "knowyourmeme",

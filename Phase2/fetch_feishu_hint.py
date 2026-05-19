@@ -18,7 +18,7 @@ def load_env(script_dir: Path):
     """Load .env from Phase2 first, then also load Phase4/.env if it exists (to pick up Feishu credentials)."""
     env_path = script_dir / ".env"
     if env_path.exists():
-        load_dotenv(env_path)
+        load_dotenv(env_path, override=True)
     env_path_phase4 = script_dir.parent / "Phase4" / ".env"
     if env_path_phase4.exists():
         load_dotenv(env_path_phase4, override=True)

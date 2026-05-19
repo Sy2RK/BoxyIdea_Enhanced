@@ -1,0 +1,175 @@
+[
+  {
+    "id": "wrong_tool_as_container",
+    "name": "非容器变容器",
+    "wrong_expectation": "玩家以为这个东西只能被进入、经过或观看，不能收纳障碍。",
+    "reversal": "它其实能临时困住、承接或隔离一个世界对象。",
+    "usable_when": [
+      "meme 的笑点是把一个原本不是存储/容器的东西当作仓库、收纳处或隐藏处",
+      "核心反转是功能误用或投机取巧"
+    ],
+    "allowed_actions": [
+      "lure_world_object",
+      "push_world_object",
+      "drop_world_object",
+      "close_world_container"
+    ],
+    "allowed_objects": [
+      "world doorway",
+      "pit",
+      "box",
+      "shell",
+      "platform alcove"
+    ],
+    "forbidden": [
+      "UI toggle as the core action",
+      "inventory menu",
+      "text label",
+      "system terminal",
+      "identity badge"
+    ]
+  },
+  {
+    "id": "danger_as_path",
+    "name": "危险物变道路",
+    "wrong_expectation": "玩家以为危险标识、护栏或陷阱必须躲开。",
+    "reversal": "危险结构本身可以变成通路、台阶或保护物。",
+    "usable_when": [
+      "meme 的笑点是温和/正常场景突然被反转成危险场景",
+      "玩家错误预期可以落在避开危险上"
+    ],
+    "allowed_actions": [
+      "tap_physical_switch",
+      "stand_on_object",
+      "use_timing",
+      "turn_obstacle_into_platform"
+    ],
+    "allowed_objects": [
+      "barrier",
+      "hazard sign as decoration only",
+      "folding platform",
+      "gate",
+      "moving plank"
+    ],
+    "forbidden": [
+      "tap warning text",
+      "drag sign text",
+      "abstract safety setting"
+    ]
+  },
+  {
+    "id": "trash_as_bridge",
+    "name": "垃圾变材料",
+    "wrong_expectation": "玩家以为垃圾、噪音或低质内容应该清理掉。",
+    "reversal": "它们堆积后反而成为桥、台阶或遮挡物。",
+    "usable_when": [
+      "meme 的笑点是讨厌的内容刷屏、泛滥或令人崩溃",
+      "情绪重点是厌烦对象反而有用"
+    ],
+    "allowed_actions": [
+      "wait_for_objects_to_stack",
+      "redirect_falling_objects",
+      "keep_generator_on",
+      "use_pile_as_platform"
+    ],
+    "allowed_objects": [
+      "falling blocks",
+      "junk pieces",
+      "feed machine as world prop",
+      "gap",
+      "platform"
+    ],
+    "forbidden": [
+      "close button as solution",
+      "settings menu",
+      "content labels as puzzle objects"
+    ]
+  },
+  {
+    "id": "proof_by_behavior",
+    "name": "行为自证",
+    "wrong_expectation": "玩家以为必须找到证据、拆开伪装或直接判定真假。",
+    "reversal": "不去证明，改为改变环境，让对象通过行为自己暴露。",
+    "usable_when": [
+      "meme 的笑点是怀疑、看穿但没有证据",
+      "角色处于观察和验证之间"
+    ],
+    "allowed_actions": [
+      "change_light",
+      "wait_for_pattern",
+      "bait_reaction",
+      "stand_on_world_pressure_plate"
+    ],
+    "allowed_objects": [
+      "lamp",
+      "pressure plate",
+      "suspicious NPC",
+      "moving platform",
+      "door"
+    ],
+    "forbidden": [
+      "evidence text",
+      "proof label",
+      "scan UI",
+      "identity terminal"
+    ]
+  },
+  {
+    "id": "fake_realism_enables_absurdity",
+    "name": "严肃规则放大荒诞",
+    "wrong_expectation": "玩家以为关卡必须按严肃、真实、常规路线运行。",
+    "reversal": "看似荒诞的世界物体才符合隐藏规则，并打开通路。",
+    "usable_when": [
+      "meme 的笑点是严肃要求和荒诞元素互相矛盾",
+      "玩家错误预期可以落在按常规路线走"
+    ],
+    "allowed_actions": [
+      "tap_physical_prop",
+      "use_sound_wave_as_world_force",
+      "ride_stage_platform",
+      "trigger_world_mechanism"
+    ],
+    "allowed_objects": [
+      "stage prop",
+      "speaker as world object",
+      "curtain platform",
+      "low ceiling",
+      "door"
+    ],
+    "forbidden": [
+      "audio setting",
+      "music label",
+      "cast list text",
+      "UI playlist"
+    ]
+  },
+  {
+    "id": "minority_state_as_key",
+    "name": "少数状态变钥匙",
+    "wrong_expectation": "玩家以为被包围的少数者应该躲避或打败多数者。",
+    "reversal": "少数状态本身触发环境规则，成为通关钥匙。",
+    "usable_when": [
+      "meme 的笑点是某个角色在系统环境中成为少数或异类",
+      "重点是身份处境反转，而不是战斗"
+    ],
+    "allowed_actions": [
+      "stand_in_world_zone",
+      "use_crowd_movement",
+      "let_guards_clear_path",
+      "trigger_pressure_plate"
+    ],
+    "allowed_objects": [
+      "robot crowd as world objects",
+      "pressure zone",
+      "gate",
+      "platform",
+      "door"
+    ],
+    "forbidden": [
+      "identity badge",
+      "application terminal",
+      "resume text",
+      "system login UI"
+    ]
+  }
+]

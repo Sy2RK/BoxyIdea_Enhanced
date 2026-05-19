@@ -1,0 +1,47 @@
+[
+  {
+    "level_name": "第3关：其实是方的 / Actually Cubed",
+    "image_path": "/Users/sheny2/Workspace/BoxyIdea/Phase5/output/level_1_第3关：其实是方的___Actually_Cubed.png",
+    "image_key": "img_v3_0211r_e24e7b28-4cf9-4a51-a1f2-5f51ee73c62g",
+    "source_image_key": "img_v3_0211r_066fdc16-90d3-4012-b3c2-7926c484723g",
+    "pushed": true,
+    "skipped_reason": null,
+    "card_push_error": null
+  },
+  {
+    "level_name": "左边抢劫，右边收费",
+    "image_path": "/Users/sheny2/Workspace/BoxyIdea/Phase5/output/level_2_左边抢劫，右边收费.png",
+    "image_key": "img_v3_0211r_fcb3c47d-ea49-48ce-b47f-682d0d8e7e8g",
+    "source_image_key": "img_v3_0211r_cfb6ab16-f36c-4b3c-8775-e37a0ff98d9g",
+    "pushed": true,
+    "skipped_reason": null,
+    "card_push_error": null
+  },
+  {
+    "level_name": "无言以对 / Deadpan Stare",
+    "image_path": "/Users/sheny2/Workspace/BoxyIdea/Phase5/output/level_3_无言以对___Deadpan_Stare.png",
+    "image_key": "img_v3_0211r_b9a47235-5213-450e-9b0a-6affa2b0e2ag",
+    "source_image_key": "img_v3_0211r_49c6630e-3da4-4d73-b113-55231a84755g",
+    "pushed": true,
+    "skipped_reason": null,
+    "card_push_error": null
+  },
+  {
+    "level_name": "无限流量",
+    "image_path": "/Users/sheny2/Workspace/BoxyIdea/Phase5/output/level_4_无限流量.png",
+    "image_key": "img_v3_0211r_3b6c6e76-80dd-47eb-8fe2-6e2d127285dg",
+    "source_image_key": "img_v3_0211r_c3840857-8dec-4fc7-9d9e-820fb9f8740g",
+    "pushed": true,
+    "skipped_reason": null,
+    "card_push_error": null
+  },
+  {
+    "level_name": "第7号：不只是无聊 / Not Boring, Disgusting",
+    "image_path": "/Users/sheny2/Workspace/BoxyIdea/Phase5/output/level_5_第7号：不只是无聊___Not_Boring,_Disgusting.png",
+    "image_key": "img_v3_0211r_fc3d291a-ac66-4331-9ef7-27e1843da54g",
+    "source_image_key": "img_v3_0211r_ec5f921e-19c2-42ba-a3c9-7483e6d0592g",
+    "pushed": true,
+    "skipped_reason": null,
+    "card_push_error": null
+  }
+]

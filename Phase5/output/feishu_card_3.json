@@ -1,0 +1,106 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 无言以对 / Deadpan Stare"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**原 meme 图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_49c6630e-3da4-4d73-b113-55231a84755g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "原 meme 图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**关卡设计图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_b9a47235-5213-450e-9b0a-6affa2b0e2ag",
+        "alt": {
+          "tag": "plain_text",
+          "content": "关卡概念图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n灵感来自“不是用解释来 دفاع，而是用沉默的死鱼眼/面无表情来回应”的梗：玩家本以为要找证据、争辩或说服别人，实际正确答案是把场景摆成一个让‘沉默凝视’成立的局面，让非语言反应本身成为通关方式。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n关卡里只有一张朝向玩家的长椅、一个单独的聚光灯，以及一小群安静的围观者。起点门在左侧，终点门在右侧。玩家一开始会觉得这里像是要“上台解释什么”的场景，但画面里没有任何可对话对象或说明牌，只有灯光把长椅区域照得格外像审视现场。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n误导点是长椅正对观众、聚光灯像审讯台，玩家很容易以为要走过去触发某种发言或互动。这个误导利用了“被注视时就该回应”的惯性认知，以及“聚光灯=表演/辩解”的联想。实际上，越是试图到处乱动、离开灯光或寻找‘说服’手段，围观者越不会进入正确状态；真正的转向来自于玩家意识到这里不是要开口，而是要把自己放在灯下静静站住。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家走到长椅区域，站在聚光灯下，面向围观者，像是在等待回应。\n2. 玩家什么都不做，保持不动；片刻后，围观者的表情统一变成空白、死板的凝视，场景进入“沉默对视”状态。\n3. 当凝视锁定后，终点门开启，玩家直接穿过终点门通关。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 别解释，先看着。\n- 表面含义: 玩家第一眼会理解成“别说太多，先观察局势”。\n- 实际含义: 提示玩家不要寻找语言解法，而是站到灯下保持静止，用沉默和凝视触发正确反应。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [查看来源](https://www.reddit.com/r/memes/comments/1tg0lyv/what_a_joke/)"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看多维表格"
+            },
+            "type": "primary",
+            "url": "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
+          }
+        ]
+      }
+    ]
+  }
+}

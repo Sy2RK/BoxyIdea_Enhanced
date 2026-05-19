@@ -1,0 +1,106 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 第7号：不只是无聊 / Not Boring, Disgusting"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**原 meme 图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_ec5f921e-19c2-42ba-a3c9-7483e6d0592g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "原 meme 图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**关卡设计图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_fc3d291a-ac66-4331-9ef7-27e1843da54g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "关卡概念图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n灵感来自那种“庄严、宏大的声音”对低质量网络内容做出夸张审判的反差：玩家起初以为只是普通的‘无聊’评价，实际却被推向更强烈的‘令人作呕’式否定。关卡把这种从轻蔑到厌恶的升级，做成一个看似神圣、实则荒诞的机关反转。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n画面中央是一座沉重的石质讲坛，旁边立着一口巨大的礼仪铜钟；讲坛后方有一扇被封住的终点门。场景整体像某种肃穆的仪式空间，但地面下隐约能看到黏稠污物的裂缝，暗示这里并不“干净”。玩家第一眼会以为这是一个需要谨慎绕行、或者等待某种普通机关触发的关卡。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n假线索是‘看起来像庄严装置的铜钟’和‘像普通封印的石台’：玩家会惯性认为钟只是装饰，或者以为要先找到钥匙/踩开关才能开门。这个误导利用了‘仪式道具只是背景’和‘门被封住就得找钥匙’的认知惯性。实际上，钟本身就是触发源，而且它不是发出普通提示音，而是以夸张的审判声波唤醒讲坛下的厌弃机关。玩家在尝试无效后，会自然注意到钟的存在感远高于其他装饰，并联想到“既然是审判场景，真正的动作应该是敲钟”。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家走到铜钟前，点击敲响它。2. 钟声震动讲坛，石台裂开并喷出一股污浊的黑泥/ sludge，讲坛抬升成可站立的平台。3. 玩家借着抬升的平台或声波带起的高度，跳到右侧终点门并通关。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 别只听它像不像赞美。\n- 表面含义: 玩家会以为这是在提醒不要被表面声音迷惑，或者单纯不要把场景当成普通表扬。\n- 实际含义: 真正要做的是把‘声音’当成机关：去敲钟，让庄严的审判之声触发讲坛下的厌弃反应，打开通路。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [查看来源](https://www.reddit.com/r/memes/comments/1tgmc6v/an_update_on_a_classic_spellchecked/)"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看多维表格"
+            },
+            "type": "primary",
+            "url": "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
+          }
+        ]
+      }
+    ]
+  }
+}

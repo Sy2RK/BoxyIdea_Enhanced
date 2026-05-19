@@ -1,0 +1,106 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 无限流量"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**原 meme 图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_c3840857-8dec-4fc7-9d9e-820fb9f8740g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "原 meme 图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**关卡设计图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_3b6c6e76-80dd-47eb-8fe2-6e2d127285dg",
+        "alt": {
+          "tag": "plain_text",
+          "content": "关卡概念图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n灵感来自“刚拿到无限上网权限，结果很快被内容淹没到失控”的梗：表面是第一次自由探索，实际是过量内容迅速堆积，把人从兴奋直接推向崩坏。关卡把这种‘越刷越多、越多越停不下来’的节奏，转成可站立的垃圾堆桥梁。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n画面里是一道大缺口，终点门在对岸；起点附近有一个不断吐出杂物的装置，先掉下来的是几块看起来毫无价值的垃圾。玩家第一眼会觉得这是干扰物，应该清掉或者躲开。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n误导点在于：前几块垃圾太像纯粹的废物，玩家会本能地把它们当成障碍而不是资源，延续‘垃圾=要移除’的惯性认知。更强的误导是，杂物一开始确实会挡路，让人以为正确做法是停止它、避开它或把它推走；但真正的通路恰恰来自让它继续堆积。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 站到吐出杂物的装置下方，让垃圾开始持续落下。\n2. 不要清理这些垃圾，保持装置继续工作，或把落下的杂物尽量引到缺口边缘堆积。\n3. 等垃圾堆长成可站立的斜坡/桥面后，沿着堆起来的杂物走到对岸终点门。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 别急着清掉它。\n- 表面含义: 看起来像是在提醒玩家不要手忙脚乱，先观察一下场面。\n- 实际含义: 真正提示玩家：这些不断出现的垃圾不是干扰，而是要保留下来并利用它们堆成通路。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [查看来源](https://www.reddit.com/r/memes/comments/1tgg8vz/lifetime_traumaaddiction_unlocked/)"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看多维表格"
+            },
+            "type": "primary",
+            "url": "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
+          }
+        ]
+      }
+    ]
+  }
+}

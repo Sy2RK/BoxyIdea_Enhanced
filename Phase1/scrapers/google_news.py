@@ -13,7 +13,7 @@ import trafilatura
 
 
 SEARCH_URL = 'https://news.google.com/search?q="meme"%20when%3A1d&hl=en-US&gl=US&ceid=US%3Aen'
-MAX_POSTS = 5
+MAX_POSTS = 10
 
 CRYPTO_KEYWORDS = {"coin", "crypto", "token", "blockchain", "dogecoin", "shiba", "bitcoin", "ethereum", "altcoin"}
 

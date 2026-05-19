@@ -4,12 +4,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "========================================"
-echo "Boxy Pipeline: Phase 1 → Phase 2 → Phase 3 → Phase 4"
+echo "Boxy Pipeline: Phase 1 → Phase 1.5 → Phase 2 → Phase 3 → Phase 4 → Phase 5"
 echo "========================================"
 
 echo ""
 echo "[pipeline] Running Phase 1..."
 bash "$SCRIPT_DIR/Phase1/run.sh"
+
+echo ""
+echo "[pipeline] Running Phase 1.5..."
+bash "$SCRIPT_DIR/Phase1_5/run.sh"
 
 echo ""
 echo "[pipeline] Running Phase 2..."
@@ -22,6 +26,10 @@ bash "$SCRIPT_DIR/Phase3/run.sh"
 echo ""
 echo "[pipeline] Running Phase 4..."
 bash "$SCRIPT_DIR/Phase4/run.sh"
+
+echo ""
+echo "[pipeline] Running Phase 5..."
+bash "$SCRIPT_DIR/Phase5/run.sh"
 
 echo ""
 echo "========================================"

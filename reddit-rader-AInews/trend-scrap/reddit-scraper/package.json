@@ -1,0 +1,22 @@
+{
+  "name": "reddit-scraper",
+  "version": "1.0.0",
+  "description": "Reddit data scraper with RapidAPI reddit34",
+  "main": "src/scraper.js",
+  "scripts": {
+    "start": "node src/scraper.js",
+    "scrape": "node src/scraper.js",
+    "test": "node test-clean.js"
+  },
+  "keywords": [
+    "reddit",
+    "scraper",
+    "rapidapi"
+  ],
+  "author": "Greatbay Studio",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1"
+  }
+}

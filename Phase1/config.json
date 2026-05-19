@@ -1,6 +1,11 @@
 {
-  "categories": ["pop_culture_memes", "pop_wordplay", "multilingual_puns"],
   "platforms": [
+    {
+      "name": "reddit_rapidapi_memes",
+      "scraper": "scrapers/reddit_rapidapi_memes.py",
+      "enabled": true,
+      "max_posts": 10
+    },
     {
       "name": "knowyourmeme",
       "scraper": "scrapers/knowyourmeme.py",

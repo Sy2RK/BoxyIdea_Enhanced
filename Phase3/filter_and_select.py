@@ -7,8 +7,14 @@ import os
 import sys
 import time
 
-from openai import OpenAI
 from dotenv import load_dotenv
+
+# Import shared LLM client (works from sibling directories)
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_SCRIPT_DIR, ".."))
+sys.path.insert(0, os.path.join(_SCRIPT_DIR, "..", "Phase2"))
+from shared.llm_client import LLMClient
+from validators import load_mechanics_library, unique_violations, validate_constraints
 
 
 def load_text_file(path):
@@ -21,33 +27,20 @@ def load_text_file(path):
         return ""
 
 
+SYS_MSG_PHASE3 = "You are a game design evaluator. Output ONLY valid JSON or raw text as requested. No markdown code fences, no extra commentary."
+
+
 def call_llm(client, model, prompt, fallback_model=None, max_tokens=2048, timeout=120):
-    """Call OpenRouter LLM and return response text. Falls back to secondary model on failure."""
-    messages = [
-        {"role": "system", "content": "You are a game design evaluator. Output ONLY valid JSON or raw text as requested. No markdown code fences, no extra commentary."},
-        {"role": "user", "content": prompt},
-    ]
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=0.4,
-            max_tokens=max_tokens,
-            timeout=timeout,
-        )
-        return response.choices[0].message.content
-    except Exception as primary_err:
-        if fallback_model:
-            print(f"  [!] Primary model failed: {primary_err}, trying fallback: {fallback_model}", file=sys.stderr)
-            response = client.chat.completions.create(
-                model=fallback_model,
-                messages=messages,
-                temperature=0.4,
-                max_tokens=max_tokens,
-                timeout=timeout,
-            )
-            return response.choices[0].message.content
-        raise
+    """DEPRECATED: kept for backwards compatibility; delegates to LLMClient."""
+    return client.call(
+        prompt=prompt,
+        system_message=SYS_MSG_PHASE3,
+        model=model,
+        fallback_model=fallback_model,
+        temperature=0.4,
+        max_tokens=max_tokens,
+        timeout=timeout,
+    )
 
 
 def extract_json(text):
@@ -65,6 +58,11 @@ def condense_level(level_data):
     """Extract only the key fields for evaluation to keep prompts short."""
     return {
         "level_name": level_data.get("level_name", ""),
+        "source_meme_understanding": level_data.get("source_meme_understanding", {}),
+        "design_brief": level_data.get("_design_brief", {}),
+        "mechanic_match": level_data.get("_mechanic_match", {}),
+        "level_skeleton": level_data.get("_level_skeleton", {}),
+        "validation_report": level_data.get("_validation_report", {}),
         "meme_inspiration": level_data.get("meme_inspiration", ""),
         "surface_layer": level_data.get("surface_layer", ""),
         "misdirection_layer": level_data.get("misdirection_layer", ""),
@@ -77,6 +75,16 @@ def condense_level(level_data):
 def build_filter_prompt(level_data, background, hints):
     """Single-step evaluation prompt: asks for reasoning ending with a single-word verdict."""
     level_json = json.dumps(condense_level(level_data), indent=2, ensure_ascii=False)
+
+    # Check for constraint violations and include them in the prompt
+    violation_note = ""
+    if "_constraint_violations" in level_data:
+        violations = level_data["_constraint_violations"]
+        violation_note = f"""
+
+⚠️ AUTOMATED CONSTRAINT CHECK FLAGGED: This design was detected to contain the following forbidden interaction types: {', '.join(violations)}.
+You MUST reject this design if the core mechanic relies on these forbidden types."""
+
     prompt = f"""You are evaluating a level design for the mobile puzzle platformer game 《Boxy》.
 
 Game background and design philosophy:
@@ -84,11 +92,29 @@ Game background and design philosophy:
 {background}
 ---
 Especially be aware of that: "  翻转必须有逻辑支撑，不能是纯粹的随机或无厘头。
-  每个反转元素必须要与后续触发行为有合理逻辑联系，不是毫无相关的关系链。" 
+  每个反转元素必须要与后续触发行为有合理逻辑联系，不是毫无相关的关系链。"
 Additional feedback and hints from the design team (may be empty if none provided):
 ---
 {hints}
 ---
+
+CRITICAL EVALUATION RULES — reject immediately if the core mechanic involves:
+1. ❌ Dragging text/words/letters as puzzle objects (e.g. dragging the word "START" onto a door)
+2. ❌ Clicking/tapping text/words/labels/sign text as puzzle objects (text can hint, but cannot be the thing that changes state)
+3. ❌ Dragging UI elements as puzzle objects (e.g. dragging a button, label, or icon to a slot)
+4. ❌ Using phone hardware sensors (gyroscope, accelerometer, camera) for puzzles
+5. ❌ Using religious elements for puzzle mechanics
+6. ❌ More than 3 puzzle-relevant interactions / discovery points, or a long chain of mechanisms
+7. ❌ A crowded screen with many props, labels, or UI elements that would not fit Boxy's sparse hand-drawn mobile interface
+8. ❌ If source_meme_understanding is present, the design ignores or contradicts its punchline/core_twist_to_preserve and only uses a generic topic from the title
+9. ❌ The gameplay is "dreamy": it jumps from meme words to arbitrary props without a clear wrong_expectation → reversal → player action chain
+10. ❌ The joke only exists in the written explanation; the playable action itself does not embody the meme's reversal
+11. ❌ The selected mechanic and level skeleton do not match the final level flow
+{violation_note}
+
+Important preference:
+- Do NOT require a UI-based or fourth-wall trick. A clean world-physical reversal is preferred when it better preserves the meme.
+- Penalize UI/text/system tricks when they become the core solution.
 
 Evaluate the following level design:
 
@@ -103,8 +129,14 @@ def build_selection_prompt(accepted_items, background, top_n=3):
     accepted_items: list of (index, title, data) tuples."""
     summaries = []
     for idx, title, data in accepted_items:
+        brief = data.get("_design_brief", {})
+        mechanic = data.get("_mechanic_match", {})
+        skeleton = data.get("_level_skeleton", {})
         summaries.append(f"""
 [{idx}] Level Name: {data.get('level_name', title)}
+Design Brief: {json.dumps(brief, ensure_ascii=False)}
+Mechanic Match: {json.dumps(mechanic, ensure_ascii=False)}
+Level Skeleton: {json.dumps(skeleton, ensure_ascii=False)}
 Meme Inspiration: {data.get('meme_inspiration', '')}
 Surface Layer: {data.get('surface_layer', '')}
 Misdirection Layer: {data.get('misdirection_layer', '')}
@@ -128,7 +160,12 @@ Criteria:
 - Most creative and memorable twist
 - Strongest fit with the Boxy philosophy
 - Best balance of surprise and logical consistency
-- Best use of existing game elements (doors, UI buttons, text, etc.)
+- Best use of physical world elements (doors, platforms, switches, hazards, characters)
+- Simple enough to stage as a Boxy-style hand-drawn screenshot with no more than 3 puzzle-relevant objects
+- Solvable through 1-3 clear interactions / discoveries
+- Strongest wrong_expectation → reversal → player_action chain
+- Least "dreamy": no arbitrary object chain, no explanation-only joke, no UI/text core puzzle
+- Do not favor UI or fourth-wall gimmicks by default; prefer the clearest playable reversal
 
 Output ONLY the numbers from the brackets, one per line, in order from #1 best to #{top_n} best. For example:
 2
@@ -154,20 +191,16 @@ def main():
     env_path = os.path.join(script_dir, ".env")
     if not os.path.exists(env_path):
         env_path = os.path.join(script_dir, "..", "Phase2", ".env")
-    load_dotenv(env_path)
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    model = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
-    fallback_model = os.environ.get("OPENROUTER_MODEL_DROP")
+    load_dotenv(env_path, override=False)
     try:
         top_n = int(os.environ.get("TOP_N", "3"))
     except ValueError:
         top_n = 3
 
-    if not api_key:
-        print("[error] OPENROUTER_API_KEY not set. Create a .env file in Phase3/ or export it.", file=sys.stderr)
-        sys.exit(1)
-
-    client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+    client = LLMClient()
+    print(f"[filter] Provider: {client.provider} — Model: {client.model}")
+    if client.fallback:
+        print(f"[filter] Fallback: {client.fallback}")
 
     # Resolve paths relative to script directory
     phase2_path = os.path.join(script_dir, config["phase2_input"])
@@ -181,6 +214,8 @@ def main():
 
     hints = load_text_file(hint_path)
     background = load_text_file(background_path)
+    mechanics_library = load_mechanics_library(os.path.join(script_dir, "..", "Phase2", "mechanics_library.json"))
+    print(f"[filter] Loaded {len(mechanics_library)} Boxy mechanics")
 
     # Load Phase 2 output
     try:
@@ -205,12 +240,32 @@ def main():
     # Step 1: Filter each valid level (single-step: evaluation + verdict in one call)
     accepted = {}
     items = list(valid_levels.items())
+
+    # Pre-filter: auto-reject designs with rule violations before spending LLM calls.
+    pre_rejected = 0
+    filtered_items = []
+    for title, data in items:
+        existing = data.get("_constraint_violations", [])
+        if not isinstance(existing, list):
+            existing = [existing]
+        fresh = validate_constraints(data, mechanics_library=mechanics_library)
+        violations = unique_violations(existing + fresh)
+        if violations:
+            data["_constraint_violations"] = violations
+            print(f"  ✗ auto-rejected {title} (constraint violations: {', '.join(violations)})")
+            pre_rejected += 1
+        else:
+            filtered_items.append((title, data))
+    items = filtered_items
+    if pre_rejected:
+        print(f"[filter] Pre-filtered {pre_rejected} designs with constraint violations")
+
     for i, (title, data) in enumerate(items):
         print(f"[{i+1}/{len(items)}] Filtering: {title}")
 
         try:
             prompt = build_filter_prompt(data, background, hints)
-            raw = call_llm(client, model, prompt, fallback_model=fallback_model, max_tokens=2048)
+            raw = call_llm(client, None, prompt, fallback_model=None, max_tokens=2048)
             if raw is None:
                 raise ValueError("LLM returned empty response")
 
@@ -247,10 +302,9 @@ def main():
                 else:
                     print(f"  ✗ rejected (last occurrence)")
             else:
-                # Fallback: if the model didn't say accept/reject clearly, default to accepting
-                # so we don't silently drop good designs due to formatting quirks
-                accepted[title] = data
-                print(f"  ✓ accepted (defaulted — no clear verdict found)")
+                # Ambiguous evaluations are risky for this stage: reject by default
+                # so unclear model formatting does not leak dreamy designs downstream.
+                print(f"  ✗ rejected (defaulted — no clear verdict found)")
         except Exception as e:
             print(f"  ✗ evaluation failed: {e}", file=sys.stderr)
 
@@ -275,7 +329,7 @@ def main():
     print(f"[select] Choosing top {top_n} levels from {len(accepted)} accepted designs...")
 
     try:
-        raw_best = call_llm(client, model, select_prompt, fallback_model=fallback_model, max_tokens=256)
+        raw_best = call_llm(client, None, select_prompt, fallback_model=None, max_tokens=256)
         if raw_best is None:
             raise ValueError("LLM returned empty response")
 

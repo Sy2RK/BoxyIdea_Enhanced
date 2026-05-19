@@ -1,0 +1,7 @@
+{
+  "phase1_input": "../Phase1/output/scraped_posts.json",
+  "output_dir": "output",
+  "output_file": "enriched_posts.json",
+  "max_posts": 10,
+  "append_to_description": true
+}

@@ -1,9 +1,50 @@
 .DS_Store
 .claude/
+.codex/
+.playwright-mcp/
+logs/
+plans/
+
+# Secrets and local credentials
 .env
+*.env
+Phase*/.env
+reddit-rader-AInews/**/.env
+
+# Python / Node caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
 node_modules/
-package.json
-package-lock.json
+**/node_modules/
+
+# Ad-hoc local test scripts
 Phase2/test_api*.py
 Phase2/test_api*.mjs
 Phase2/test_openrouter_sdk.mjs
+
+# Runtime data and generated artifacts
+Phase1/output/
+Phase2/output/
+Phase3/output/
+Phase4/output/
+Phase5/cookies/*.json
+Phase5/chrome_profile/
+Phase5/output/
+Phase5/output/*
+reddit-rader-AInews/**/data/
+
+# Keep curated Phase5 examples for the README/demo snapshot.
+!Phase5/output/
+!Phase5/output/level_1_第3关：其实是方的___Actually_Cubed.png
+!Phase5/output/level_2_左边抢劫，右边收费.png
+!Phase5/output/level_3_无言以对___Deadpan_Stare.png
+!Phase5/output/level_4_无限流量.png
+!Phase5/output/level_5_第7号：不只是无聊___Not_Boring,_Disgusting.png
+!Phase5/output/feishu_card_1.json
+!Phase5/output/feishu_card_2.json
+!Phase5/output/feishu_card_3.json
+!Phase5/output/feishu_card_4.json
+!Phase5/output/feishu_card_5.json
+!Phase5/output/visualization_summary.json

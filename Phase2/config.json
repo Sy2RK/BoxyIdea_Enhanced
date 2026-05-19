@@ -1,5 +1,5 @@
 {
-  "phase1_input": "../Phase1/output/scraped_posts.json",
+  "phase1_input": "../Phase1_5/output/enriched_posts.json",
   "synthesizer": "synthesizer.py",
   "output_dir": "output",
   "output_file": "synthesized_levels.json"

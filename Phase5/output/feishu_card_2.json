@@ -1,0 +1,106 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Boxy 关卡设计: 左边抢劫，右边收费"
+      },
+      "template": "purple"
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**原 meme 图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_cfb6ab16-f36c-4b3c-8775-e37a0ff98d9g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "原 meme 图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**关卡设计图**"
+        }
+      },
+      {
+        "tag": "img",
+        "img_key": "img_v3_0211r_fcb3c47d-ea49-48ce-b47f-682d0d8e7e8g",
+        "alt": {
+          "tag": "plain_text",
+          "content": "关卡概念图"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**灵感来源**\n灵感来自“明抢”和“明码标价式收割”的对照：玩家先以为这是一个简单的持枪威胁场景，真正的笑点却在于，钱不是被粗暴抢走，而是被一层层看似正规、礼貌的收费装置慢慢拿走，像合法化的拦路打劫。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**表层**\n画面左侧是一道压迫感很强的持枪剪影，像经典抢劫现场；右侧则排着一串看起来很正式的收费闸门和出币槽，整体像一条“通行即收费”的通道。起点门在左下，终点门在最右侧，玩家第一眼会自然盯着左边的威胁。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**误导层**\n左侧的持枪剪影利用了玩家对“威胁=主要障碍”的惯性认知，让人以为必须先处理掉它才能前进；但它其实只是一个死路式的气氛装置。右侧的收费闸门则利用了“闸门只是通行设施”的常识，玩家会低估它们的掠夺性，误以为只是背景。真正的转向来自于发现：左边看似最危险，右边才是实际的“合法化抽取”。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**完整流程**\n1. 玩家先靠近左侧持枪剪影，尝试跳跃或接触后发现它只会触发威胁动作并把路挡住，无法通过。\n2. 玩家转向右侧，站上舞台平台沿着收费闸门前进；平台会依次经过多个闸门，每经过一个就被扣走少量金币，像被礼貌地“收过路费”。\n3. 当最后一个出币槽吐出最后一枚金币后，终点门解锁并打开，玩家直接进入终点。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**提示设计**\n**提示语**: 别只盯着枪，真正会拿走你的，是那些看起来最有礼貌的门。\n- 表面含义: 玩家会以为提示是在说要避开武器威胁，或者先处理左边的敌人。\n- 实际含义: 提示在暗示右侧的收费闸门才是关键；“有礼貌的门”指的是看似正规、实则层层抽成的通道。"
+        }
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**来源**: [查看来源](https://www.reddit.com/r/memes/comments/1tgkyov/take_me_back_to_the_good_old_days/)"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看多维表格"
+            },
+            "type": "primary",
+            "url": "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
+          }
+        ]
+      }
+    ]
+  }
+}

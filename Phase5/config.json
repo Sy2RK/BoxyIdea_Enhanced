@@ -1,0 +1,14 @@
+{
+  "phase3_input": "../Phase3/output/Phase3_result.txt",
+  "output_dir": "output",
+  "cookie_dir": "cookies",
+  "reference_images": [
+    "20260507-182207.jpg",
+    "20260507-182211.jpg",
+    "reference_images"
+  ],
+  "image_style": "game_screenshot",
+  "image_format": "png",
+  "generation_timeout": 120,
+  "max_image_generations_per_run": 1
+}
