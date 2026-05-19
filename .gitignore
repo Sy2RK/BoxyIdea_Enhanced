@@ -26,7 +26,10 @@ Phase2/test_openrouter_sdk.mjs
 
 # Runtime data and generated artifacts
 Phase1/output/
+Phase1_5/output/
 Phase2/output/
+Phase2/package.json
+Phase2/package-lock.json
 Phase3/output/
 Phase4/output/
 Phase5/cookies/*.json
@@ -34,6 +37,13 @@ Phase5/chrome_profile/
 Phase5/output/
 Phase5/output/*
 reddit-rader-AInews/**/data/
+reddit-rader-AInews/*
+!reddit-rader-AInews/trend-scrap/
+reddit-rader-AInews/trend-scrap/*
+!reddit-rader-AInews/trend-scrap/reddit-scraper/
+!reddit-rader-AInews/trend-scrap/reddit-scraper/**
+reddit-rader-AInews/trend-scrap/reddit-scraper/.env
+reddit-rader-AInews/trend-scrap/reddit-scraper/test-clean.js
 
 # Keep curated Phase5 examples for the README/demo snapshot.
 !Phase5/output/
