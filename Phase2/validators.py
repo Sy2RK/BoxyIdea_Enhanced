@@ -234,11 +234,24 @@ def validate_constraints(level_data, mechanics_library=None, require_compiler_fi
         if isinstance(world_objects, list) and len([o for o in world_objects if str(o).strip()]) > 3:
             violations.append("骨架对象超过3个")
 
+    binding = level_data.get("meme_binding")
+    if isinstance(binding, dict) and binding.get("would_lose_joke_if_action_removed") is False:
+        violations.append("笑点未绑定到操作")
+
+    risk = level_data.get("implementation_risk")
+    if isinstance(risk, dict):
+        if risk.get("relies_on_text_explanation"):
+            violations.append("依赖文字解释")
+
     if require_compiler_fields:
         for key, label in [
             ("_design_brief", "缺少设计简报"),
             ("_mechanic_match", "缺少机制匹配"),
             ("_level_skeleton", "缺少关卡骨架"),
+            ("playability_contract", "缺少可玩性契约"),
+            ("meme_binding", "缺少梗绑定说明"),
+            ("implementation_risk", "缺少实现风险说明"),
+            ("visual_brief", "缺少视觉简报"),
         ]:
             if not isinstance(level_data.get(key), dict):
                 violations.append(label)
@@ -264,4 +277,7 @@ def validation_report(level_data, mechanics_library=None):
         "violations": violations,
         "step_count": _count_steps(level_data),
         "element_count": len(level_data.get("elements", [])) if isinstance(level_data.get("elements"), list) else 0,
+        "has_playability_contract": isinstance(level_data.get("playability_contract"), dict),
+        "has_meme_binding": isinstance(level_data.get("meme_binding"), dict),
+        "has_visual_brief": isinstance(level_data.get("visual_brief"), dict),
     }

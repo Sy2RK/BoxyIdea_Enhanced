@@ -93,6 +93,59 @@ def format_hint_design(hint_design, markdown=True):
     return "\n".join(lines)
 
 
+def format_quality_summary(level_data):
+    """Format Phase2/Phase3 quality metadata for review cards."""
+    gate = level_data.get("_phase3_quality_gate")
+    scores = {}
+    keep_reason = ""
+    risks = []
+    if isinstance(gate, dict):
+        scores = gate.get("scores") or {}
+        keep_reason = gate.get("keep_reason") or gate.get("summary") or ""
+        risks = gate.get("main_risks") or []
+
+    if not scores:
+        scores = level_data.get("quality_scores") or {}
+    rank_report = level_data.get("candidate_rank_report")
+    if not keep_reason and isinstance(rank_report, dict):
+        keep_reason = rank_report.get("selection_reason", "")
+        risks = rank_report.get("main_risks", risks)
+
+    score_keys = [
+        ("meme_fidelity", "梗绑定"),
+        ("playability", "可玩性"),
+        ("boxy_fit", "Boxy适配"),
+        ("implementation_feasibility", "实现可行"),
+        ("visual_clarity", "视觉清晰"),
+    ]
+    score_parts = []
+    total = scores.get("total")
+    for key, label in score_keys:
+        value = scores.get(key)
+        if value is not None:
+            score_parts.append(f"{label} {value}/5")
+    if total is None and score_parts:
+        try:
+            total = sum(int(scores.get(key, 0)) for key, _ in score_keys)
+        except (TypeError, ValueError):
+            total = None
+
+    lines = []
+    if total is not None:
+        lines.append(f"**可应用性评分**: {total}/25")
+    elif score_parts:
+        lines.append("**可应用性评分**")
+    if score_parts:
+        lines.append(" / ".join(score_parts))
+    if keep_reason:
+        lines.append(f"**保留理由**: {keep_reason}")
+    if risks:
+        clean_risks = [str(item).strip() for item in risks if str(item).strip()]
+        if clean_risks:
+            lines.append("**主要风险**: " + "；".join(clean_risks[:3]))
+    return "\n".join(lines)
+
+
 def build_card_with_image(
     level_data,
     image_key,
@@ -145,6 +198,16 @@ def build_card_with_image(
 
     # Divider
     elements.append({"tag": "hr"})
+
+    quality_md = format_quality_summary(level_data)
+    if quality_md:
+        elements.append({
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": quality_md,
+            },
+        })
 
     # Meme inspiration
     elements.append({

@@ -69,7 +69,103 @@ def condense_level(level_data):
         "full_game_flow": level_data.get("full_game_flow", ""),
         "hint_design": level_data.get("hint_design", {}),
         "design_check": level_data.get("design_check", {}),
+        "playability_contract": level_data.get("playability_contract", {}),
+        "meme_binding": level_data.get("meme_binding", {}),
+        "implementation_risk": level_data.get("implementation_risk", {}),
+        "visual_brief": level_data.get("visual_brief", {}),
+        "phase2_quality_scores": level_data.get("quality_scores", {}),
+        "candidate_rank_report": level_data.get("candidate_rank_report", {}),
     }
+
+
+QUALITY_SCORE_KEYS = [
+    "meme_fidelity",
+    "playability",
+    "boxy_fit",
+    "implementation_feasibility",
+    "visual_clarity",
+]
+
+
+def normalize_quality_scores(raw_scores):
+    scores = {}
+    for key in QUALITY_SCORE_KEYS:
+        try:
+            value = int(raw_scores.get(key, 0))
+        except (AttributeError, TypeError, ValueError):
+            value = 0
+        scores[key] = max(0, min(5, value))
+    scores["total"] = sum(scores.values())
+    return scores
+
+
+def quality_gate_verdict(evaluation):
+    if not isinstance(evaluation, dict):
+        return False, normalize_quality_scores({}), ["评审输出不是JSON对象"]
+
+    scores = normalize_quality_scores(evaluation.get("scores", {}))
+    reasons = []
+    if scores["meme_fidelity"] < 4:
+        reasons.append("meme_fidelity低于4")
+    if scores["playability"] < 4:
+        reasons.append("playability低于4")
+    for key in QUALITY_SCORE_KEYS:
+        if scores[key] < 3:
+            reasons.append(f"{key}低于3")
+    if scores["total"] < 20:
+        reasons.append("总分低于20")
+
+    model_decision = str(evaluation.get("decision", "")).strip().lower()
+    if model_decision == "reject":
+        reasons.append("模型判定reject")
+    elif model_decision not in {"accept", "reject"}:
+        reasons.append("模型未给出明确decision")
+
+    return not reasons, scores, unique_violations(reasons)
+
+
+def semantic_prefilter_violations(level_data):
+    """Catch common explanation-only adaptations before spending evaluator calls."""
+    violations = []
+    mechanic = level_data.get("_mechanic_match") or {}
+    mechanic_id = str(mechanic.get("mechanic_id", "")).strip()
+    if mechanic_id == "trash_as_bridge":
+        source = level_data.get("source_meme_understanding") or {}
+        source_text = " ".join(
+            str(source.get(key, ""))
+            for key in ["punchline", "why_funny", "core_twist_to_preserve"]
+        ).lower()
+        judgment_terms = [
+            "boring",
+            "disgust",
+            "slop",
+            "无聊",
+            "恶心",
+            "厌恶",
+            "鄙视",
+            "嫌弃",
+        ]
+        overflow_terms = [
+            "overflow",
+            "flood",
+            "overwhelm",
+            "unrestricted",
+            "addiction",
+            "堆积",
+            "泛滥",
+            "刷屏",
+            "淹没",
+            "过量",
+            "无限",
+            "成瘾",
+            "沉迷",
+            "停不下来",
+        ]
+        if any(term in source_text for term in judgment_terms) and not any(
+            term in source_text for term in overflow_terms
+        ):
+            violations.append("情绪评价被泛化成垃圾桥")
+    return violations
 
 
 def build_filter_prompt(level_data, background, hints):
@@ -120,7 +216,27 @@ Evaluate the following level design:
 
 {level_json}
 
-Write 2-3 sentences explaining your decision, then end your response with exactly one word on the final line: accept or reject."""
+Return ONLY valid JSON in this exact shape:
+{{
+  "decision": "accept or reject",
+  "scores": {{
+    "meme_fidelity": 1,
+    "playability": 1,
+    "boxy_fit": 1,
+    "implementation_feasibility": 1,
+    "visual_clarity": 1
+  }},
+  "summary": "one short Chinese sentence",
+  "keep_reason": "why this is worth sending forward, empty if rejected",
+  "main_risks": ["1-3 concrete risks"],
+  "reject_reason": "why it failed, empty if accepted"
+}}
+
+Scoring thresholds you must apply:
+- Reject if meme_fidelity < 4 or playability < 4.
+- Reject if any score is below 3.
+- Reject if total score is below 20.
+- A design can be visually nice and still rejected if it cannot become a playable Boxy puzzle."""
     return prompt
 
 
@@ -137,6 +253,10 @@ def build_selection_prompt(accepted_items, background, top_n=3):
 Design Brief: {json.dumps(brief, ensure_ascii=False)}
 Mechanic Match: {json.dumps(mechanic, ensure_ascii=False)}
 Level Skeleton: {json.dumps(skeleton, ensure_ascii=False)}
+Quality Gate: {json.dumps(data.get('_phase3_quality_gate', {}), ensure_ascii=False)}
+Playability Contract: {json.dumps(data.get('playability_contract', {}), ensure_ascii=False)}
+Meme Binding: {json.dumps(data.get('meme_binding', {}), ensure_ascii=False)}
+Implementation Risk: {json.dumps(data.get('implementation_risk', {}), ensure_ascii=False)}
 Meme Inspiration: {data.get('meme_inspiration', '')}
 Surface Layer: {data.get('surface_layer', '')}
 Misdirection Layer: {data.get('misdirection_layer', '')}
@@ -248,8 +368,13 @@ def main():
         existing = data.get("_constraint_violations", [])
         if not isinstance(existing, list):
             existing = [existing]
-        fresh = validate_constraints(data, mechanics_library=mechanics_library)
-        violations = unique_violations(existing + fresh)
+        fresh = validate_constraints(
+            data,
+            mechanics_library=mechanics_library,
+            require_compiler_fields=True,
+        )
+        semantic = semantic_prefilter_violations(data)
+        violations = unique_violations(existing + fresh + semantic)
         if violations:
             data["_constraint_violations"] = violations
             print(f"  ✗ auto-rejected {title} (constraint violations: {', '.join(violations)})")
@@ -269,42 +394,19 @@ def main():
             if raw is None:
                 raise ValueError("LLM returned empty response")
 
-            # Parse verdict robustly from the response
             print(f"  [raw model output]\n{raw}\n  [/raw]")
-            text_lower = raw.strip().lower()
-            lines = raw.strip().splitlines()
-            last_line = lines[-1].strip().lower() if lines else ""
-            print(f"  [debug] raw length: {len(raw)} chars, {len(lines)} lines")
-            print(f"  [debug] last_line: '{last_line}'")
-            print(f"  [debug] 'accept' in full text: {'accept' in text_lower}")
-            print(f"  [debug] 'reject' in full text: {'reject' in text_lower}")
+            evaluation = extract_json(raw)
+            passed, scores, gate_reasons = quality_gate_verdict(evaluation)
+            evaluation["scores"] = scores
+            evaluation["gate_reasons"] = gate_reasons
+            data["_phase3_quality_gate"] = evaluation
             print(f"  ✓ evaluation done")
 
-            # Priority 1: last line contains accept/reject
-            if "accept" in last_line and "reject" not in last_line:
+            if passed:
                 accepted[title] = data
-                print(f"  ✓ accepted")
-            elif "reject" in last_line and "accept" not in last_line:
-                print(f"  ✗ rejected")
-            # Priority 2: search whole text for accept/reject
-            elif "accept" in text_lower and "reject" not in text_lower:
-                accepted[title] = data
-                print(f"  ✓ accepted (detected in full text)")
-            elif "reject" in text_lower and "accept" not in text_lower:
-                print(f"  ✗ rejected (detected in full text)")
-            # Priority 3: both words present → prefer the one that appears last
-            elif "accept" in text_lower or "reject" in text_lower:
-                accept_idx = text_lower.rfind("accept")
-                reject_idx = text_lower.rfind("reject")
-                if accept_idx > reject_idx:
-                    accepted[title] = data
-                    print(f"  ✓ accepted (last occurrence)")
-                else:
-                    print(f"  ✗ rejected (last occurrence)")
+                print(f"  ✓ accepted (score {scores['total']}/25)")
             else:
-                # Ambiguous evaluations are risky for this stage: reject by default
-                # so unclear model formatting does not leak dreamy designs downstream.
-                print(f"  ✗ rejected (defaulted — no clear verdict found)")
+                print(f"  ✗ rejected ({', '.join(gate_reasons)})")
         except Exception as e:
             print(f"  ✗ evaluation failed: {e}", file=sys.stderr)
 

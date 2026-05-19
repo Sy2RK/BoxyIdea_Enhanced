@@ -22,6 +22,7 @@ from feishu_image import (
     build_card_with_image,
     push_card_with_image,
     format_hint_design,
+    format_quality_summary,
     DEFAULT_FEISHU_BASE_TOKEN,
     DEFAULT_FEISHU_BASE_TABLE_ID,
     DEFAULT_FEISHU_BASE_URL,
@@ -426,6 +427,13 @@ def _build_text_only_card(level_data, base_url=DEFAULT_FEISHU_BASE_URL):
     source_post_url = level_data.get("source_post_url", "")
 
     elements = []
+
+    quality_md = format_quality_summary(level_data)
+    if quality_md:
+        elements.append({
+            "tag": "div",
+            "text": {"tag": "lark_md", "content": quality_md}
+        })
 
     elements.append({
         "tag": "div",

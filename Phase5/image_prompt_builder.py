@@ -128,6 +128,9 @@ def build_image_prompt(level_data, style="game_screenshot"):
     misdirection = level_data.get("misdirection_layer", "")
     elements = level_data.get("elements", [])
     meme_inspiration = level_data.get("meme_inspiration", "")
+    visual_brief = level_data.get("visual_brief")
+    if not isinstance(visual_brief, dict):
+        visual_brief = {}
 
     # Build a deliberately small elements description. The real Boxy screens are sparse;
     # pushing every JSON element into the image causes clutter and wrong visual output.
@@ -149,6 +152,17 @@ def build_image_prompt(level_data, style="game_screenshot"):
     style_instruction = STYLE_INSTRUCTIONS.get(style, STYLE_INSTRUCTIONS["game_screenshot"])
     visual_beats = _extract_visual_beats(level_data.get("full_game_flow", ""))
     beats_text = "\n".join(f"- {beat}" for beat in visual_beats) if visual_beats else "- A simple 1 to 3 step puzzle moment"
+    must_show = visual_brief.get("must_show") or []
+    avoid_showing = visual_brief.get("avoid_showing") or []
+    focal_objects = visual_brief.get("focal_objects") or []
+    visual_brief_text = ""
+    if visual_brief:
+        visual_brief_text = f"""
+Phase5 visual brief:
+- Screenshot state to render: {visual_brief.get('screenshot_state', 'reversal_visible')}
+- Must show: {'; '.join(str(item) for item in must_show[:4]) or 'the playable reversal clearly'}
+- Focal objects: {'; '.join(str(item) for item in focal_objects[:3]) or 'the core puzzle object and the end door'}
+- Avoid showing: {'; '.join(str(item) for item in avoid_showing[:4]) or 'extra explanatory clutter'}"""
     level_badge_rule = (
         "Only show the top-left level badge because the level number itself is part of this puzzle."
         if _uses_level_number_mechanic(level_data)
@@ -184,6 +198,7 @@ Visible puzzle objects, maximum {MAX_VISIBLE_PUZZLE_OBJECTS}:
 
 Gameplay beats to imply, maximum 3 and not as a sequence:
 {beats_text}
+{visual_brief_text}
 
 Strict simplicity rules:
 - Show no more than 3 puzzle-relevant objects besides Boxy, doors, platforms, and normal UI

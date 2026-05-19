@@ -138,6 +138,26 @@ def normalize_source_image_path(raw_path, script_dir):
 SYS_MSG_PHASE2 = "You are a game level designer. Output ONLY valid JSON. No markdown fences, no extra text."
 
 
+CANDIDATE_STRATEGIES = [
+    {
+        "id": "A_meme_fidelity",
+        "label": "Candidate A",
+        "focus": (
+            "Preserve the meme punchline and comic reversal as strongly as possible. "
+            "Reject generic topic adaptation even if it looks easy to stage."
+        ),
+    },
+    {
+        "id": "B_playability",
+        "label": "Candidate B",
+        "focus": (
+            "Prioritize a practical Boxy puzzle that can be implemented with physical "
+            "objects, clear state changes, and obvious success/failure feedback."
+        ),
+    },
+]
+
+
 def call_llm(client, model, prompt, fallback_model=None):
     """DEPRECATED: kept for backwards compatibility; delegates to LLMClient."""
     return client.call(
@@ -192,7 +212,14 @@ Output ONLY valid JSON in this exact shape:
 }}"""
 
 
-def build_mechanic_match_prompt(brief, mechanics_library):
+def build_mechanic_match_prompt(brief, mechanics_library, strategy=None):
+    strategy_note = ""
+    if strategy:
+        strategy_note = f"""
+Candidate strategy:
+- ID: {strategy.get('id')}
+- Focus: {strategy.get('focus')}
+"""
     return f"""You are Phase2B of a Boxy level design compiler.
 
 Design brief:
@@ -202,6 +229,7 @@ Allowed Boxy mechanic library:
 ---
 {format_mechanics_for_prompt(mechanics_library)}
 ---
+{strategy_note}
 
 Task:
 Choose exactly ONE primary mechanic from the library. You may not invent a new mechanic.
@@ -221,13 +249,20 @@ Output ONLY valid JSON:
 }}"""
 
 
-def build_skeleton_prompt(brief, mechanic_match, mechanics_library):
+def build_skeleton_prompt(brief, mechanic_match, mechanics_library, strategy=None):
     mechanic_id = mechanic_match.get("mechanic_id", "")
     library_item = {}
     for item in mechanics_library:
         if item.get("id") == mechanic_id:
             library_item = item
             break
+    strategy_note = ""
+    if strategy:
+        strategy_note = f"""
+Candidate strategy:
+- ID: {strategy.get('id')}
+- Focus: {strategy.get('focus')}
+"""
 
     return f"""You are Phase2C of a Boxy level design compiler.
 
@@ -239,6 +274,7 @@ Selected mechanic:
 
 Library definition for selected mechanic:
 {json.dumps(library_item, ensure_ascii=False, indent=2)}
+{strategy_note}
 
 Task:
 Create the minimal playable skeleton. Do NOT write final prose yet.
@@ -267,7 +303,22 @@ Output ONLY valid JSON:
 }}"""
 
 
-def build_final_level_prompt(brief, mechanic_match, skeleton, background, response_points, hint):
+def build_final_level_prompt(
+    brief,
+    mechanic_match,
+    skeleton,
+    background,
+    response_points,
+    hint,
+    strategy=None,
+):
+    strategy_note = ""
+    if strategy:
+        strategy_note = f"""
+Candidate strategy:
+- ID: {strategy.get('id')}
+- Focus: {strategy.get('focus')}
+"""
     return f"""You are Phase2D of a Boxy level design compiler.
 
 Game background:
@@ -293,6 +344,7 @@ Selected mechanic:
 
 Approved minimal skeleton:
 {json.dumps(skeleton, ensure_ascii=False, indent=2)}
+{strategy_note}
 
 Task:
 Expand the approved skeleton into the existing Phase2 level JSON schema.
@@ -304,6 +356,10 @@ Hard rules:
 - The full_game_flow must be 1-3 numbered steps.
 - The hint text must have "participates_in_gameplay": false.
 - The joke must live in the playable reversal, not only in the prose.
+- Add concrete implementation-facing fields so another designer or engineer can judge playability without rereading the prose.
+- The playability_contract must describe observable state changes, not vague feelings.
+- The meme_binding must prove that the player action itself carries the meme joke.
+- The visual_brief should describe the single screenshot state Phase5 should render. Prefer the solved/reversal-visible state if the mechanic is dynamic.
 - The content language should be Chinese.
 
 Output ONLY valid JSON:
@@ -319,6 +375,32 @@ Output ONLY valid JSON:
     "surface_meaning": "what player thinks at first glance",
     "actual_meaning": "what it really points to",
     "participates_in_gameplay": false
+  }},
+  "playability_contract": {{
+    "initial_state": "what is visible before the player solves the level",
+    "wrong_action": "the natural but wrong player action",
+    "failure_feedback": "observable feedback when the player follows the wrong expectation",
+    "correct_action": "the short correct action, using a physical world object or waiting/positioning behavior",
+    "state_change": "what visibly changes in the level after the correct action",
+    "win_condition": "how Boxy reaches or unlocks the end door"
+  }},
+  "meme_binding": {{
+    "source_punchline": "the meme punchline in one sentence",
+    "playable_reversal": "how the punchline becomes a playable reversal",
+    "why_action_preserves_joke": "why the required player action carries the joke",
+    "would_lose_joke_if_action_removed": true
+  }},
+  "implementation_risk": {{
+    "needs_new_mechanic": false,
+    "relies_on_text_explanation": false,
+    "dynamic_state_hard_to_visualize": false,
+    "risk_notes": ["1-3 concrete risks or empty array"]
+  }},
+  "visual_brief": {{
+    "screenshot_state": "initial_misdirection | reversal_visible | solved_path",
+    "must_show": ["2-4 things the image must make visible"],
+    "avoid_showing": ["things that would make the image misleading or too explanatory"],
+    "focal_objects": ["1-3 objects Phase5 should emphasize"]
   }},
   "design_check": {{
     "short_path": true,
@@ -353,59 +435,210 @@ Rules:
 - Remove UI/text/terminal/label/identity/menu/core-system objects from the solution.
 - Use only physical world objects as puzzle objects.
 - Maximum 3 puzzle elements and 3 player steps.
+- Keep or repair playability_contract, meme_binding, implementation_risk, and visual_brief.
+- If the current design is explanation-only, move the meme reversal into correct_action and state_change.
 - Keep the existing output schema.
 - Output ONLY repaired valid JSON."""
 
 
-def compile_level_design(client, post, background, response_points, hint, mechanics_library):
-    """Run the structured meme → mechanic → skeleton → final-level compiler."""
-    brief = call_json(client, build_design_brief_prompt(post), max_tokens=1600, temperature=0.35)
-    print("  ✓ step 1 (design brief) done")
+def build_candidate_evaluation_prompt(brief, candidates):
+    compact_candidates = []
+    for candidate in candidates:
+        data = candidate["level"]
+        compact_candidates.append({
+            "candidate_id": candidate["strategy"]["id"],
+            "level_name": data.get("level_name", ""),
+            "mechanic_id": candidate["mechanic_match"].get("mechanic_id", ""),
+            "meme_inspiration": data.get("meme_inspiration", ""),
+            "full_game_flow": data.get("full_game_flow", ""),
+            "playability_contract": data.get("playability_contract", {}),
+            "meme_binding": data.get("meme_binding", {}),
+            "implementation_risk": data.get("implementation_risk", {}),
+            "visual_brief": data.get("visual_brief", {}),
+            "validation_report": data.get("_validation_report", {}),
+        })
 
-    mechanic_match = call_json(
-        client,
-        build_mechanic_match_prompt(brief, mechanics_library),
-        max_tokens=1800,
-        temperature=0.25,
-    )
-    print(f"  ✓ step 2 (mechanic match: {mechanic_match.get('mechanic_id', 'unknown')}) done")
+    return f"""You are Phase2E, a strict Boxy design reviewer.
 
-    skeleton = call_json(
-        client,
-        build_skeleton_prompt(brief, mechanic_match, mechanics_library),
-        max_tokens=2200,
-        temperature=0.35,
-    )
-    print("  ✓ step 3 (level skeleton) done")
+Design brief:
+{json.dumps(brief, ensure_ascii=False, indent=2)}
 
-    data = call_json(
-        client,
-        build_final_level_prompt(brief, mechanic_match, skeleton, background, response_points, hint),
-        max_tokens=4096,
-        temperature=0.45,
-    )
-    print("  ✓ step 4 (final json) done")
+Candidate levels:
+{json.dumps(compact_candidates, ensure_ascii=False, indent=2)}
 
+Score each candidate from 1 to 5 on:
+- meme_fidelity: player action preserves the original punchline
+- playability: clear initial state, wrong action, feedback, correct action, state change, win condition
+- boxy_fit: feels like a short Boxy puzzle, not a generic platform scene
+- implementation_feasibility: can be implemented with simple physical objects and limited new code
+- visual_clarity: one screenshot can communicate the puzzle state
+
+Rules:
+- Penalize designs whose joke only exists in prose.
+- Penalize designs whose correct action is arbitrary or dreamlike.
+- Penalize designs that rely on text explanation, UI/menu tricks, religion, or many props.
+- Prefer a lower-concept but playable puzzle over a poetic but vague one.
+
+Output ONLY valid JSON:
+{{
+  "selected_candidate_id": "A_meme_fidelity or B_playability",
+  "scores": {{
+    "A_meme_fidelity": {{
+      "meme_fidelity": 1,
+      "playability": 1,
+      "boxy_fit": 1,
+      "implementation_feasibility": 1,
+      "visual_clarity": 1,
+      "total": 5
+    }},
+    "B_playability": {{
+      "meme_fidelity": 1,
+      "playability": 1,
+      "boxy_fit": 1,
+      "implementation_feasibility": 1,
+      "visual_clarity": 1,
+      "total": 5
+    }}
+  }},
+  "selection_reason": "why the selected candidate is more usable",
+  "main_risks": ["1-3 risks to carry into Phase3"]
+}}"""
+
+
+def _score_total(score_block):
+    if not isinstance(score_block, dict):
+        return 0
+    keys = [
+        "meme_fidelity",
+        "playability",
+        "boxy_fit",
+        "implementation_feasibility",
+        "visual_clarity",
+    ]
+    total = 0
+    for key in keys:
+        try:
+            value = int(score_block.get(key, 0))
+        except (TypeError, ValueError):
+            value = 0
+        total += max(0, min(5, value))
+    return total
+
+
+def _attach_compiler_metadata(data, brief, mechanic_match, skeleton, strategy):
     data["_design_brief"] = brief
     data["_mechanic_match"] = mechanic_match
     data["_level_skeleton"] = skeleton
+    data["_candidate_strategy"] = {
+        "id": strategy.get("id", ""),
+        "focus": strategy.get("focus", ""),
+    }
+    return data
+
+
+def compile_candidate(client, brief, background, response_points, hint, mechanics_library, strategy):
+    mechanic_match = call_json(
+        client,
+        build_mechanic_match_prompt(brief, mechanics_library, strategy=strategy),
+        max_tokens=1800,
+        temperature=0.25,
+    )
+    print(
+        f"  ✓ {strategy['label']} mechanic: "
+        f"{mechanic_match.get('mechanic_id', 'unknown')}"
+    )
+
+    skeleton = call_json(
+        client,
+        build_skeleton_prompt(brief, mechanic_match, mechanics_library, strategy=strategy),
+        max_tokens=2200,
+        temperature=0.35,
+    )
+    print(f"  ✓ {strategy['label']} skeleton done")
+
+    data = call_json(
+        client,
+        build_final_level_prompt(
+            brief,
+            mechanic_match,
+            skeleton,
+            background,
+            response_points,
+            hint,
+            strategy=strategy,
+        ),
+        max_tokens=5200,
+        temperature=0.45,
+    )
+    data = _attach_compiler_metadata(data, brief, mechanic_match, skeleton, strategy)
 
     violations = validate_level_constraints(data, mechanics_library=mechanics_library)
     if violations:
-        print(f"  ⚠️ repair pass triggered: {', '.join(violations)}", file=sys.stderr)
+        print(
+            f"  ⚠️ {strategy['label']} repair pass: {', '.join(violations)}",
+            file=sys.stderr,
+        )
         repaired = call_json(
             client,
             build_repair_prompt(data, violations, brief, mechanic_match, skeleton),
-            max_tokens=4096,
+            max_tokens=5200,
             temperature=0.25,
         )
-        repaired["_design_brief"] = brief
-        repaired["_mechanic_match"] = mechanic_match
-        repaired["_level_skeleton"] = skeleton
-        data = repaired
-        print("  ✓ repair pass done")
+        data = _attach_compiler_metadata(repaired, brief, mechanic_match, skeleton, strategy)
+        print(f"  ✓ {strategy['label']} repair done")
 
-    return data
+    data["_validation_report"] = validation_report(data, mechanics_library=mechanics_library)
+    return {
+        "strategy": strategy,
+        "mechanic_match": mechanic_match,
+        "skeleton": skeleton,
+        "level": data,
+    }
+
+
+def choose_best_candidate(client, brief, candidates):
+    report = call_json(
+        client,
+        build_candidate_evaluation_prompt(brief, candidates),
+        max_tokens=2200,
+        temperature=0.2,
+    )
+    selected_id = str(report.get("selected_candidate_id", "")).strip()
+    by_id = {candidate["strategy"]["id"]: candidate for candidate in candidates}
+    if selected_id not in by_id:
+        scores = report.get("scores", {})
+        selected_id = max(
+            by_id,
+            key=lambda candidate_id: _score_total(scores.get(candidate_id, {})),
+        )
+    selected = by_id[selected_id]["level"]
+    scores = report.get("scores", {})
+    selected["candidate_rank_report"] = report
+    selected["quality_scores"] = scores.get(selected_id, {})
+    print(f"  ✓ selected candidate: {selected_id}")
+    return selected
+
+
+def compile_level_design(client, post, background, response_points, hint, mechanics_library):
+    """Run the structured meme → candidates → quality-ranked level compiler."""
+    brief = call_json(client, build_design_brief_prompt(post), max_tokens=1600, temperature=0.35)
+    print("  ✓ step 1 (design brief) done")
+
+    candidates = []
+    for strategy in CANDIDATE_STRATEGIES:
+        candidates.append(
+            compile_candidate(
+                client=client,
+                brief=brief,
+                background=background,
+                response_points=response_points,
+                hint=hint,
+                mechanics_library=mechanics_library,
+                strategy=strategy,
+            )
+        )
+
+    return choose_best_candidate(client, brief, candidates)
 
 
 def extract_json(text):
