@@ -60,7 +60,7 @@ Each phase has its own `.env` file. You must create these before running.
 Phase 1 now uses Reddit `r/memes` as the primary meme source via the reusable `reddit-rader-AInews` RapidAPI `reddit34` scraper, with KnowYourMeme and Google News as supplemental sources. Create `Phase1/.env` from `Phase1/.env.example` before running the full pipeline:
 
 ```bash
-RAPIDAPI_KEY=your_rapidapi_key
+RAPIDAPI_KEY=
 RAPIDAPI_HOST=reddit34.p.rapidapi.com
 ```
 
@@ -112,7 +112,7 @@ Create `.env` in `Phase2/` and `Phase3/`:
 
 ```bash
 LLM_PROVIDER=google
-GOOGLE_API_KEY=AIzaSyDAKHYZ0LlnP86jPNbFoSI27-lvLATqf3A
+GOOGLE_API_KEY=
 GOOGLE_MODEL=gemini-3.1-flash-lite-preview
 ```
 

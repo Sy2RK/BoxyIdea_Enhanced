@@ -8,7 +8,7 @@ import sys
 import requests
 
 
-DEFAULT_FEISHU_BASE_TOKEN = "Ou7Pb9cJJao7CWsaCAmcQQ2unph"
+DEFAULT_FEISHU_BASE_TOKEN = ""
 DEFAULT_FEISHU_BASE_TABLE_ID = "tblla4v6G8LqAMeP"
 DEFAULT_FEISHU_BASE_URL = "https://scnmrtumk0zm.feishu.cn/base/Ou7Pb9cJJao7CWsaCAmcQQ2unph?table=tblla4v6G8LqAMeP"
 
