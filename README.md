@@ -25,3 +25,5 @@ Required integrations depend on the phases you run:
 ## Notes
 
 The repository keeps only a small curated sample of generated Phase5 outputs. Runtime outputs, caches, browser profiles, raw scraped images, and credentials should stay local.
+
+For details on current disk usage and cleanup options, see [Storage and Cleanup Notes](docs/storage-cleanup.md).
